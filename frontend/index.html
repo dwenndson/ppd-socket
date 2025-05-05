@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seega Online</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="game.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            grid-template-rows: repeat(5, 60px);
+            gap: 5px;
+            margin: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #e0e0e0;
+        }
+        .cell {
+            width: 60px;
+            height: 60px;
+            background-color: #f0f0f0;
+            border: 1px solid #999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 24px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        .cell:hover {
+            background-color: #e8e8e8;
+        }
+        .cell.centro {
+            background-color: #ccc;
+            border: 2px dashed #999;
+        }
+        .cell.branco {
+            background-color: #ffffff;
+            color: #000000;
+            border: 2px solid #000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .cell.preto {
+            background-color: #000000;
+            color: #ffffff;
+            border: 2px solid #666;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .cell.selected {
+            outline: 3px solid #ff9900;
+            transform: scale(1.05);
+            z-index: 1;
+        }
+        .chat-box {
+            height: 250px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chat-bubble {
+            max-width: 75%;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.3;
+            word-wrap: break-word;
+        }
+        .bubble-left {
+            background-color: #f1f0f0;
+            align-self: flex-start;
+            margin-right: auto;
+        }
+        .bubble-right {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .chat-time {
+            font-size: 10px;
+            color: #666;
+            margin-left: 8px;
+        }
+        #chat-box {
+            display: flex;
+            flex-direction: column;
+        }
+        .btn-danger, .btn-primary {
+            margin: 5px;
+        }
+        .score-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        .score-box {
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-width: 120px;
+        }
+        .score-branco {
+            background-color: #ffffff;
+            border: 2px solid #000;
+            color: #000;
+        }
+        .score-preto {
+            background-color: #000000;
+            border: 2px solid #666;
+            color: #fff;
+        }
+        .game-status {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4 text-center">
+        <div class="row">
+            <div class="col-md-8">
+                <h1 class="mb-3">Seega Online</h1>
+                <div class="game-status">
+                    <div id="fase" class="fw-bold mb-2">Fase: COLOCAÇÃO</div>
+                    <div id="jogador-atual" class="fw-bold mb-2">Vez do Jogador: BRANCO</div>
+                </div>
+                
+                <div class="score-container">
+                    <div class="score-box score-branco">
+                        <strong>Jogador BRANCO:</strong> <span id="score-branco">0</span>
+                    </div>
+                    <div class="score-box score-preto">
+                        <strong>Jogador PRETO:</strong> <span id="score-preto">0</span>
+                    </div>
+                </div>
+                
+                <div class="justify-content-center board mb-4" id="game-board"></div>
+                <button class="btn btn-danger" id="btn-desistir">Desistir</button>
+            </div>
+            <div class="col-md-4">
+                <div class="mt-5">
+                    <h5>Chat</h5>
+                    <div class="chat-box rounded mb-2" id="chat-box"></div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="chat-input" placeholder="Digite uma mensagem...">
+                        <button class="btn btn-primary" id="send-msg">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="mensagem-fim" class="text-danger fw-bold mt-3"></div>
+    </div>
+</body>
+</html>
