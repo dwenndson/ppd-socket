@@ -124,81 +124,73 @@ function handleCellClick(cell, row, col) {
     }
 }
 
-function appendChatMessage(msg) {
+function appendChatMessage(msg) { // Use 'msg' como definido no parâmetro
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    
+
     // Verifica se a mensagem começa com um prefixo de jogador
     const messageRegex = /^([A-Z]+): (.*)/;
-    const matches = messageData.match(messageRegex);
-    
+    const matches = msg.match(messageRegex); 
+
     if (matches && matches.length === 3) {
-        // A mensagem está no formato "JOGADOR: conteúdo"
-        const prefixJogador = matches[1]; // "BRANCO" ou "PRETO"
-        const conteudoMensagem = matches[2]; // Pode ser JSON ou texto simples
-        
+        const prefixJogador = matches[1];
+        const conteudoMensagem = matches[2];
+
         try {
-            // Tenta parsear o conteúdo da mensagem como JSON
             const jsonData = JSON.parse(conteudoMensagem);
-            
-            // Se é JSON válido e tem a estrutura esperada
             if (jsonData.mensagem && jsonData.tipoJogador) {
-                // Usa o tipoJogador do objeto JSON
                 const senderType = jsonData.tipoJogador;
                 const messageText = jsonData.mensagem;
-                
-                // Verifica se a mensagem é do jogador local
                 const playerType = localPlayer === 1 ? 'BRANCO' : 'PRETO';
                 const isLocalMessage = senderType === playerType;
                 const bubbleClass = isLocalMessage ? 'bubble-right' : 'bubble-left';
-                
+
                 const bubble = document.createElement('div');
                 bubble.classList.add('chat-bubble', bubbleClass);
                 bubble.innerHTML = `Jogador ${senderType}: ${messageText} <span class="chat-time">${time}</span>`;
                 document.getElementById('chat-box').appendChild(bubble);
                 document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
-                return;
+                return; // Sai da função se formatado com sucesso
             }
         } catch (e) {
-            // Se não for JSON válido, continua com o processamento normal
-            console.log("Conteúdo não é JSON válido:", e);
+            console.log("Conteúdo após prefixo não é JSON válido ou falta campos:", e);
+            // Continua para tentar outras formas de parse ou fallback
         }
     }
-    
-    // Tenta parsear a mensagem completa como JSON
+
+    // Tenta parsear a mensagem completa como JSON (caso não tenha o prefixo)
     try {
-        const data = JSON.parse(messageData);
-        
+        const data = JSON.parse(msg); // << CORREÇÃO AQUI
         if (data.mensagem && data.tipoJogador) {
-            // Obtém o tipo de jogador e a mensagem
-            const senderType = data.tipoJogador; // "BRANCO" ou "PRETO"
+            const senderType = data.tipoJogador;
             const messageText = data.mensagem;
-            
-            // Verifica se a mensagem é do jogador local
             const playerType = localPlayer === 1 ? 'BRANCO' : 'PRETO';
             const isLocalMessage = senderType === playerType;
             const bubbleClass = isLocalMessage ? 'bubble-right' : 'bubble-left';
-            
+
             const bubble = document.createElement('div');
             bubble.classList.add('chat-bubble', bubbleClass);
             bubble.innerHTML = `Jogador ${senderType}: ${messageText} <span class="chat-time">${time}</span>`;
             document.getElementById('chat-box').appendChild(bubble);
             document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
-            return;
+            return; // Sai da função se formatado com sucesso
         }
     } catch (e) {
-        // Se não for JSON, trata como mensagem de texto normal
-        console.log("Não foi possível parsear a mensagem como JSON:", e);
+        console.log("Não foi possível parsear a mensagem completa como JSON:", e);
+        // Continua para o fallback
     }
-    
-    // Fallback para o formato de texto simples
+
+    // Fallback para exibir a mensagem como texto simples se nenhum parse funcionou
+    // Pode ser útil para mensagens do sistema ou formatos inesperados
+    console.warn("Exibindo mensagem como texto simples (fallback):", msg);
     const playerType = localPlayer === 1 ? 'BRANCO' : 'PRETO';
-    const messageContainsPlayer = messageData.includes(`Jogador ${playerType}:`);
+    // Verifica se a mensagem bruta contém o nome do jogador local para alinhar à direita (opcional)
+    const messageContainsPlayer = typeof msg === 'string' && msg.includes(`Jogador ${playerType}:`); // << Usa msg aqui também
     const bubbleClass = messageContainsPlayer ? 'bubble-right' : 'bubble-left';
-    
+
     const bubble = document.createElement('div');
     bubble.classList.add('chat-bubble', bubbleClass);
-    bubble.innerHTML = `${messageData} <span class="chat-time">${time}</span>`;
+    bubble.innerHTML = `${msg} <span class="chat-time">${time}</span>`; // Exibe a msg original
     document.getElementById('chat-box').appendChild(bubble);
     document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
 }
