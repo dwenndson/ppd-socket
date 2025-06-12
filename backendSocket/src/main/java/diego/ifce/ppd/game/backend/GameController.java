@@ -56,8 +56,10 @@ class GameController {
         int colunaOrigem = payload.get("colunaOrigem");
         int linhaDestino = payload.get("linhaDestino");
         int colunaDestino = payload.get("colunaDestino");
+
         Casa origem = tabuleiro.getCasa(linhaOrigem, colunaOrigem);
         Casa destino = tabuleiro.getCasa(linhaDestino, colunaDestino);
+
         if (!origem.estaVazia() && origem.getPeca().getCor() == jogadorAtual.getCor() && destino.estaVazia()) {
             int deltaLinha = Math.abs(linhaDestino - linhaOrigem);
             int deltaColuna = Math.abs(colunaDestino - colunaOrigem);
@@ -65,6 +67,7 @@ class GameController {
                 Peca peca = origem.getPeca();
                 origem.setPeca(null);
                 destino.setPeca(peca);
+
                 if (linhaDestino == 2 && colunaDestino == 2) {
                     peca.incrementarTurnosNoCentro();
                 } else {
